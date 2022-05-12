@@ -1,7 +1,9 @@
 package users
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/acargorkem/ecommerce_users-api/domain/users"
 	"github.com/acargorkem/ecommerce_users-api/services"
@@ -17,14 +19,30 @@ func CreateUser(c *gin.Context) {
 		c.JSON(restErr.Status, restErr)
 		return
 	}
+
 	result, saveErr := services.CreateUser(user)
 	if saveErr != nil {
-		// TODO: HANDLE USER CREATION ERROR
+		fmt.Println(saveErr)
+		c.JSON(saveErr.Status, saveErr)
 		return
 	}
 	c.JSON(http.StatusCreated, result)
 }
 
 func GetUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "implement me")
+	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if userErr != nil {
+		err := errors.NewBadRequestError("user id should be a number")
+		c.JSON(err.Status, err)
+		return
+
+	}
+	user, getErr := services.GetUser(userId)
+	if getErr != nil {
+		fmt.Println(getErr)
+		c.JSON(getErr.Status, getErr)
+		return
+	}
+	c.JSON(http.StatusOK, user)
+
 }
