@@ -48,7 +48,7 @@ func init() {
 		host, port, user, password, db_name, ssl_mode,
 	)
 
-	Client, err := sql.Open("postgres", dataSourceName)
+	Client, err = sql.Open("postgres", dataSourceName)
 	if err != nil {
 		panic(err)
 	}
