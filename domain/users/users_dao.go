@@ -3,6 +3,7 @@ package users
 import (
 	"fmt"
 
+	usersdb "github.com/acargorkem/ecommerce_users-api/datasources/postgresql/users_db"
 	dateutils "github.com/acargorkem/ecommerce_users-api/utils/date_utils"
 	"github.com/acargorkem/ecommerce_users-api/utils/errors"
 )
@@ -12,6 +13,9 @@ var (
 )
 
 func (user *User) Get() *errors.RestErr {
+	if err := usersdb.Client.Ping(); err != nil {
+		panic(err)
+	}
 	result := usersDB[user.Id]
 	if result == nil {
 		return errors.NewNotFoundError(fmt.Sprintf("user %d not found", user.Id))
