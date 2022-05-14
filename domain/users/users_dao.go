@@ -11,24 +11,27 @@ import (
 
 const (
 	indexUniqueEmail = "duplicate key value violates unique constraint \"users_email_key\""
+	errorNorows      = "no rows in result"
 	queryInsertUser  = "INSERT INTO users (first_name, last_name, email, created_at) VALUES ($1, $2, $3, $4) RETURNING *;"
-)
-
-var (
-	usersDB = make(map[int64]*User)
+	queryGetUser     = "SELECT id, first_name, last_name, email, created_at FROM users WHERE id=$1;"
 )
 
 func (user *User) Get() *errors.RestErr {
-
-	result := usersDB[user.Id]
-	if result == nil {
-		return errors.NewNotFoundError(fmt.Sprintf("user %d not found", user.Id))
+	stmt, err := usersdb.Client.Prepare(queryGetUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
 	}
-	user.Id = result.Id
-	user.FirstName = result.FirstName
-	user.LastName = result.LastName
-	user.Email = result.Email
-	user.Created_at = result.Created_at
+	defer stmt.Close()
+
+	row := stmt.QueryRow(user.Id)
+	if err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Created_at); err != nil {
+		if strings.Contains(err.Error(), errorNorows) {
+			return errors.NewNotFoundError(
+				fmt.Sprintf("user %d not found", user.Id))
+		}
+		return errors.NewInternalServerError(fmt.Sprintf("error when trying to get user %d: %s", user.Id, err.Error()))
+	}
+
 	return nil
 }
 
