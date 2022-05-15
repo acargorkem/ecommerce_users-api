@@ -8,10 +8,9 @@ import (
 )
 
 const (
-	indexUniqueEmail = "duplicate key value violates unique constraint \"users_email_key\""
-	errorNorows      = "no rows in result"
-	queryInsertUser  = "INSERT INTO users (first_name, last_name, email, created_at) VALUES ($1, $2, $3, $4) RETURNING *;"
-	queryGetUser     = "SELECT id, first_name, last_name, email, created_at FROM users WHERE id=$1;"
+	queryInsertUser = "INSERT INTO users (first_name, last_name, email, created_at) VALUES ($1, $2, $3, $4) RETURNING *;"
+	queryGetUser    = "SELECT id, first_name, last_name, email, created_at FROM users WHERE id=$1;"
+	queryUpdateUser = "UPDATE users SET first_name=$1, last_name=$2, email=$3 WHERE id=$4;"
 )
 
 func (user *User) Get() *errors.RestErr {
@@ -45,5 +44,19 @@ func (user *User) Save() *errors.RestErr {
 		return postgresqlutils.ParseError(err)
 	}
 
+	return nil
+}
+
+func (user *User) Update() *errors.RestErr {
+	stmt, err := usersdb.Client.Prepare(queryUpdateUser)
+	if err != nil {
+		return postgresqlutils.ParseError(err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Id)
+	if err != nil {
+		return postgresqlutils.ParseError(err)
+	}
 	return nil
 }
