@@ -11,6 +11,7 @@ const (
 	queryInsertUser = "INSERT INTO users (first_name, last_name, email, created_at) VALUES ($1, $2, $3, $4) RETURNING *;"
 	queryGetUser    = "SELECT id, first_name, last_name, email, created_at FROM users WHERE id=$1;"
 	queryUpdateUser = "UPDATE users SET first_name=$1, last_name=$2, email=$3 WHERE id=$4;"
+	queryDeleteUser = "DELETE FROM users WHERE id=$1;"
 )
 
 func (user *User) Get() *errors.RestErr {
@@ -56,6 +57,19 @@ func (user *User) Update() *errors.RestErr {
 
 	_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Id)
 	if err != nil {
+		return postgresqlutils.ParseError(err)
+	}
+	return nil
+}
+
+func (user *User) Delete() *errors.RestErr {
+	stmt, err := usersdb.Client.Prepare(queryDeleteUser)
+	if err != nil {
+		return postgresqlutils.ParseError(err)
+	}
+	defer stmt.Close()
+
+	if _, err = stmt.Exec(user.Id); err != nil {
 		return postgresqlutils.ParseError(err)
 	}
 	return nil
