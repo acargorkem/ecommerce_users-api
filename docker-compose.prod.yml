@@ -1,0 +1,37 @@
+version: '3.1'
+
+services:
+
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    networks:
+      - full-app
+
+  api:
+    image: 128292706517.dkr.ecr.eu-central-1.amazonaws.com/ecommerce_users:d4f76e001f69fc75eb42b266495e36c7577643a0
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - DB_SSLMODE=${DB_SSLMODE}
+    depends_on:
+      - postgres
+    networks:
+      - full-app
+    entrypoint: ["/app/wait-for.sh", "postgres:${DB_PORT}", "--", "/app/start.sh"]
+    command: ["/app/main"]
+
+networks:
+  full-app:
+    driver: bridge
