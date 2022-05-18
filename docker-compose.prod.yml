@@ -15,7 +15,7 @@ services:
       - full-app
 
   api:
-    image: 128292706517.dkr.ecr.eu-central-1.amazonaws.com/ecommerce_users:d4f76e001f69fc75eb42b266495e36c7577643a0
+    image: 128292706517.dkr.ecr.eu-central-1.amazonaws.com/ecommerce_users:latest
     ports:
       - "8080:8080"
     environment:
