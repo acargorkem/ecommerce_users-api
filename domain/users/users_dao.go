@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	queryInsertUser       = "INSERT INTO users (first_name, last_name, email, created_at, status) VALUES ($1, $2, $3, $4, $5) RETURNING *;"
+	queryInsertUser       = "INSERT INTO users (first_name, last_name, email, created_at, hashed_password, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;"
 	queryGetUser          = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE id=$1;"
 	queryUpdateUser       = "UPDATE users SET first_name=$1, last_name=$2, email=$3, status=$4 WHERE id=$5;"
 	queryDeleteUser       = "DELETE FROM users WHERE id=$1;"
@@ -38,9 +38,9 @@ func (user *User) Save() *errors.RestErr {
 	}
 	defer stmt.Close()
 
-	row := stmt.QueryRow(user.FirstName, user.LastName, user.Email, user.Created_at, user.Status)
+	row := stmt.QueryRow(user.FirstName, user.LastName, user.Email, user.Created_at, user.Hashed_Password, user.Status)
 
-	err = row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Status, &user.Created_at)
+	err = row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Status, &user.Hashed_Password, &user.Created_at)
 	if err != nil {
 		return postgresqlutils.ParseError(err)
 	}

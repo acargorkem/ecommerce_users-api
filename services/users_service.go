@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/acargorkem/ecommerce_users-api/domain/users"
+	cryptoutils "github.com/acargorkem/ecommerce_users-api/utils/crypto_utils"
 	dateutils "github.com/acargorkem/ecommerce_users-api/utils/date_utils"
 	"github.com/acargorkem/ecommerce_users-api/utils/errors"
 )
@@ -12,8 +13,14 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 
 	}
 
+	hashedPassword, err := cryptoutils.HashPassword(user.Hashed_Password)
+	if err != nil {
+		return nil, errors.NewInternalServerError("failed to hash password")
+	}
+
 	user.Status = users.StatusActive
 	user.Created_at = dateutils.GetNowDbFormat()
+	user.Hashed_Password = hashedPassword
 
 	if err := user.Save(); err != nil {
 		return nil, err
@@ -70,7 +77,7 @@ func DeleteUser(userId int64) *errors.RestErr {
 	return user.Delete()
 }
 
-func Search(status string) ([]users.User, *errors.RestErr) {
+func Search(status string) (users.Users, *errors.RestErr) {
 	dao := &users.User{}
 	return dao.FindByStatus(status)
 }
