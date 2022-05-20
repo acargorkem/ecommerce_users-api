@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	usersdb "github.com/acargorkem/ecommerce_users-api/datasources/postgresql/users_db"
+	"github.com/acargorkem/ecommerce_users-api/logger"
 	"github.com/acargorkem/ecommerce_users-api/utils/errors"
 	postgresqlutils "github.com/acargorkem/ecommerce_users-api/utils/postgresql_utils"
 )
@@ -19,12 +20,14 @@ const (
 func (user *User) Get() *errors.RestErr {
 	stmt, err := usersdb.Client.Prepare(queryGetUser)
 	if err != nil {
+		logger.Error("error when trying to prepare get user statement", err)
 		return postgresqlutils.ParseError(err)
 	}
 	defer stmt.Close()
 
 	row := stmt.QueryRow(user.Id)
 	if err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Created_at, &user.Status); err != nil {
+		logger.Error("error when trying to scan row on get user", err)
 		return postgresqlutils.ParseError(err)
 	}
 
@@ -34,6 +37,7 @@ func (user *User) Get() *errors.RestErr {
 func (user *User) Save() *errors.RestErr {
 	stmt, err := usersdb.Client.Prepare(queryInsertUser)
 	if err != nil {
+		logger.Error("error when trying to prepare insert user statement", err)
 		return postgresqlutils.ParseError(err)
 	}
 	defer stmt.Close()
@@ -42,6 +46,7 @@ func (user *User) Save() *errors.RestErr {
 
 	err = row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Status, &user.Hashed_Password, &user.Created_at)
 	if err != nil {
+		logger.Error("error when trying to scan row on save user", err)
 		return postgresqlutils.ParseError(err)
 	}
 
@@ -51,12 +56,14 @@ func (user *User) Save() *errors.RestErr {
 func (user *User) Update() *errors.RestErr {
 	stmt, err := usersdb.Client.Prepare(queryUpdateUser)
 	if err != nil {
+		logger.Error("error when trying to prepare update user statement", err)
 		return postgresqlutils.ParseError(err)
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Status, user.Id)
 	if err != nil {
+		logger.Error("error when trying to update user", err)
 		return postgresqlutils.ParseError(err)
 	}
 	return nil
@@ -65,11 +72,13 @@ func (user *User) Update() *errors.RestErr {
 func (user *User) Delete() *errors.RestErr {
 	stmt, err := usersdb.Client.Prepare(queryDeleteUser)
 	if err != nil {
+		logger.Error("error when trying to prepare delete user statement", err)
 		return postgresqlutils.ParseError(err)
 	}
 	defer stmt.Close()
 
 	if _, err = stmt.Exec(user.Id); err != nil {
+		logger.Error("error when trying to delete user", err)
 		return postgresqlutils.ParseError(err)
 	}
 	return nil
@@ -78,12 +87,14 @@ func (user *User) Delete() *errors.RestErr {
 func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
 	stmt, err := usersdb.Client.Prepare(queryFindUserbyStatus)
 	if err != nil {
+		logger.Error("error when trying to prepare find users by status statement", err)
 		return nil, postgresqlutils.ParseError(err)
 	}
 	defer stmt.Close()
 
 	rows, err := stmt.Query(status)
 	if err != nil {
+		logger.Error("error when trying to find users by status", err)
 		return nil, postgresqlutils.ParseError(err)
 	}
 	defer rows.Close()
@@ -92,6 +103,7 @@ func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
 	for rows.Next() {
 		var user User
 		if err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Created_at, &user.Status); err != nil {
+			logger.Error("error when trying to scan rows in find users by status", err)
 			return nil, postgresqlutils.ParseError(err)
 		}
 		results = append(results, user)
@@ -101,5 +113,4 @@ func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
 		return nil, errors.NewNotFoundError(fmt.Sprintf("no users matchings status : %s ", status))
 	}
 	return results, nil
-
 }

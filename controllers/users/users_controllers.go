@@ -1,7 +1,6 @@
 package users
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -30,7 +29,6 @@ func Create(c *gin.Context) {
 
 	result, saveErr := services.UsersService.CreateUser(user)
 	if saveErr != nil {
-		fmt.Println(saveErr)
 		c.JSON(saveErr.Status, saveErr)
 		return
 	}
@@ -45,7 +43,6 @@ func Get(c *gin.Context) {
 	}
 	user, getErr := services.UsersService.GetUser(userId)
 	if getErr != nil {
-		fmt.Println(getErr)
 		c.JSON(getErr.Status, getErr)
 		return
 	}
