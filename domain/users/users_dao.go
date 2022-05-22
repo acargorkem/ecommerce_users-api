@@ -10,11 +10,12 @@ import (
 )
 
 const (
-	queryInsertUser       = "INSERT INTO users (first_name, last_name, email, created_at, hashed_password, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;"
-	queryGetUser          = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE id=$1;"
-	queryUpdateUser       = "UPDATE users SET first_name=$1, last_name=$2, email=$3, status=$4 WHERE id=$5;"
-	queryDeleteUser       = "DELETE FROM users WHERE id=$1;"
-	queryFindUserbyStatus = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE status=$1 ORDER BY id ASC;"
+	queryInsertUser             = "INSERT INTO users (first_name, last_name, email, created_at, hashed_password, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;"
+	queryGetUser                = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE id=$1;"
+	queryUpdateUser             = "UPDATE users SET first_name=$1, last_name=$2, email=$3, status=$4 WHERE id=$5;"
+	queryDeleteUser             = "DELETE FROM users WHERE id=$1;"
+	queryFindByStatus           = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE status=$1 ORDER BY id ASC;"
+	queryFindByEmailAndPassword = "SELECT id, first_name, last_name, email, created_at, hashed_password, status FROM users WHERE email=$1 AND status=$2;"
 )
 
 func (user *User) Get() *errors.RestErr {
@@ -85,7 +86,7 @@ func (user *User) Delete() *errors.RestErr {
 }
 
 func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
-	stmt, err := usersdb.Client.Prepare(queryFindUserbyStatus)
+	stmt, err := usersdb.Client.Prepare(queryFindByStatus)
 	if err != nil {
 		logger.Error("error when trying to prepare find users by status statement", err)
 		return nil, postgresqlutils.ParseError(err)
@@ -113,4 +114,22 @@ func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
 		return nil, errors.NewNotFoundError(fmt.Sprintf("no users matchings status : %s ", status))
 	}
 	return results, nil
+}
+
+func (user *User) FindByEmail() *errors.RestErr {
+	stmt, err := usersdb.Client.Prepare(queryFindByEmailAndPassword)
+	if err != nil {
+		logger.Error("error when trying to prepare find user by email", err)
+		return postgresqlutils.ParseError(err)
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(user.Email, StatusActive)
+	if err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email,
+		&user.Created_at, &user.Hashed_Password, &user.Status); err != nil {
+		logger.Error("error when trying to scan row on find user by email", err)
+		return postgresqlutils.ParseError(err)
+	}
+
+	return nil
 }
