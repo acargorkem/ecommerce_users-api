@@ -4,7 +4,7 @@ import (
 	"github.com/acargorkem/ecommerce_users-api/domain/users"
 	cryptoutils "github.com/acargorkem/ecommerce_users-api/utils/crypto_utils"
 	dateutils "github.com/acargorkem/ecommerce_users-api/utils/date_utils"
-	"github.com/acargorkem/ecommerce_users-api/utils/errors"
+	"github.com/acargorkem/ecommerce_utils-go/rest_errors"
 )
 
 var (
@@ -15,15 +15,15 @@ type usersService struct {
 }
 
 type usersServiceInterface interface {
-	CreateUser(users.User) (*users.User, *errors.RestErr)
-	GetUser(int64) (*users.User, *errors.RestErr)
-	UpdateUser(bool, users.User) (*users.User, *errors.RestErr)
-	DeleteUser(int64) *errors.RestErr
-	SearchUser(string) (users.Users, *errors.RestErr)
-	LoginUser(users.LoginRequest) (*users.User, *errors.RestErr)
+	CreateUser(users.User) (*users.User, *rest_errors.RestErr)
+	GetUser(int64) (*users.User, *rest_errors.RestErr)
+	UpdateUser(bool, users.User) (*users.User, *rest_errors.RestErr)
+	DeleteUser(int64) *rest_errors.RestErr
+	SearchUser(string) (users.Users, *rest_errors.RestErr)
+	LoginUser(users.LoginRequest) (*users.User, *rest_errors.RestErr)
 }
 
-func (s *usersService) CreateUser(user users.User) (*users.User, *errors.RestErr) {
+func (s *usersService) CreateUser(user users.User) (*users.User, *rest_errors.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 
@@ -31,7 +31,7 @@ func (s *usersService) CreateUser(user users.User) (*users.User, *errors.RestErr
 
 	hashedPassword, err := cryptoutils.HashPassword(user.Hashed_Password)
 	if err != nil {
-		return nil, errors.NewInternalServerError("failed to hash password")
+		return nil, rest_errors.NewInternalServerError("errors when trying to hash password", rest_errors.NewError("Whoops, something went wrong"))
 	}
 
 	user.Status = users.StatusActive
@@ -45,7 +45,7 @@ func (s *usersService) CreateUser(user users.User) (*users.User, *errors.RestErr
 	return &user, nil
 }
 
-func (s *usersService) GetUser(userId int64) (*users.User, *errors.RestErr) {
+func (s *usersService) GetUser(userId int64) (*users.User, *rest_errors.RestErr) {
 	result := &users.User{
 		Id: userId,
 	}
@@ -56,7 +56,7 @@ func (s *usersService) GetUser(userId int64) (*users.User, *errors.RestErr) {
 
 }
 
-func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
+func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User, *rest_errors.RestErr) {
 	current, err := s.GetUser(user.Id)
 	if err != nil {
 		return nil, err
@@ -88,17 +88,17 @@ func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User,
 	return current, nil
 }
 
-func (s *usersService) DeleteUser(userId int64) *errors.RestErr {
+func (s *usersService) DeleteUser(userId int64) *rest_errors.RestErr {
 	user := &users.User{Id: userId}
 	return user.Delete()
 }
 
-func (s *usersService) SearchUser(status string) (users.Users, *errors.RestErr) {
+func (s *usersService) SearchUser(status string) (users.Users, *rest_errors.RestErr) {
 	dao := &users.User{}
 	return dao.FindByStatus(status)
 }
 
-func (s *usersService) LoginUser(request users.LoginRequest) (*users.User, *errors.RestErr) {
+func (s *usersService) LoginUser(request users.LoginRequest) (*users.User, *rest_errors.RestErr) {
 	dao := &users.User{
 		Email: request.Email,
 	}
@@ -108,7 +108,7 @@ func (s *usersService) LoginUser(request users.LoginRequest) (*users.User, *erro
 
 	isInvalidPassword := cryptoutils.CheckPassword(request.Password, dao.Hashed_Password)
 	if isInvalidPassword != nil {
-		return nil, errors.NewUnauthorizedError("invalid credentials")
+		return nil, rest_errors.NewUnauthorizedError("invalid credentials")
 	}
 
 	return dao, nil

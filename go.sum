@@ -1,3 +1,5 @@
+github.com/acargorkem/ecommerce_utils-go v0.0.0-20220523100220-5ca8acad19e5 h1:+ruTmluJB8TE8Gsd97QZ+pG90i7ltMen0oU7qgGPBx8=
+github.com/acargorkem/ecommerce_utils-go v0.0.0-20220523100220-5ca8acad19e5/go.mod h1:t/lTeOF+qBRO6sPA/bkLFUJGGOl9J1yIDdvlRXKswkQ=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/brianvoe/gofakeit/v6 v6.16.0 h1:EelCqtfArd8ppJ0z+TpOxXH8sVWNPBadPNdCDSMMw7k=
 github.com/brianvoe/gofakeit/v6 v6.16.0/go.mod h1:Ow6qC71xtwm79anlwKRlWZW6zVq9D2XHE4QSSMP/rU8=

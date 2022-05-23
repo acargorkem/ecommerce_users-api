@@ -3,6 +3,7 @@ module github.com/acargorkem/ecommerce_users-api
 go 1.18
 
 require (
+	github.com/acargorkem/ecommerce_utils-go v0.0.0-20220523100220-5ca8acad19e5
 	github.com/brianvoe/gofakeit/v6 v6.16.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect

@@ -3,7 +3,7 @@ package users
 import (
 	"strings"
 
-	"github.com/acargorkem/ecommerce_users-api/utils/errors"
+	"github.com/acargorkem/ecommerce_utils-go/rest_errors"
 )
 
 const (
@@ -22,12 +22,12 @@ type User struct {
 
 type Users []User
 
-func (user *User) Validate() *errors.RestErr {
+func (user *User) Validate() *rest_errors.RestErr {
 	user.FirstName = strings.TrimSpace(user.FirstName)
 	user.LastName = strings.TrimSpace(user.LastName)
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
 	if user.Email == "" {
-		return errors.NewBadRequestError("invalid email address")
+		return rest_errors.NewBadRequestError("invalid email address")
 	}
 	return nil
 }
