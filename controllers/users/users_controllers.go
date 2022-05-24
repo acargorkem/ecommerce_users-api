@@ -1,9 +1,11 @@
 package users
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/acargorkem/ecommerce_oauth-client/oauth"
 	"github.com/acargorkem/ecommerce_users-api/domain/users"
 	"github.com/acargorkem/ecommerce_users-api/services"
 	"github.com/acargorkem/ecommerce_utils-go/rest_errors"
@@ -36,6 +38,12 @@ func Create(c *gin.Context) {
 }
 
 func Get(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		fmt.Println(err)
+		c.JSON(err.Status, err)
+		return
+	}
+
 	userId, userIdErr := getUserId(c.Param("user_id"))
 	if userIdErr != nil {
 		c.JSON(userIdErr.Status, userIdErr)
@@ -46,7 +54,13 @@ func Get(c *gin.Context) {
 		c.JSON(getErr.Status, getErr)
 		return
 	}
-	c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-Public") == "true"))
+
+	if oauth.GetCallerId(c.Request) == user.Id {
+		c.JSON(http.StatusCreated, user.Marshall(false))
+		return
+	}
+
+	c.JSON(http.StatusOK, user.Marshall(oauth.IsPublic(c.Request)))
 
 }
 
