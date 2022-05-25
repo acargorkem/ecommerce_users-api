@@ -20,10 +20,10 @@ func ParseError(err error) *rest_errors.RestErr {
 			return rest_errors.NewBadRequestError(errMessage)
 		}
 
-		return rest_errors.NewInternalServerError("errors on query", rest_errors.NewError("database_error"))
+		return rest_errors.NewInternalServerError("database_error", rest_errors.NewError("errors on query"))
 	}
 	if err == sql.ErrNoRows {
 		return rest_errors.NewNotFoundError("user not found")
 	}
-	return rest_errors.NewInternalServerError("unexpected_error", rest_errors.NewError("Whoops, something went wrong"))
+	return rest_errors.NewInternalServerError("Whoops, something went wrong", rest_errors.NewError("unexpected_error"))
 }
