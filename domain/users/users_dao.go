@@ -15,7 +15,7 @@ const (
 	queryGetUser                = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE id=$1;"
 	queryUpdateUser             = "UPDATE users SET first_name=$1, last_name=$2, email=$3, status=$4 WHERE id=$5;"
 	queryDeleteUser             = "DELETE FROM users WHERE id=$1;"
-	queryFindByStatus           = "SELECT ...,....,..., first_name, last_name, email, created_at, status FROM users WHERE status=$1 ORDER BY id ASC;"
+	queryFindByStatus           = "SELECT id, first_name, last_name, email, created_at, status FROM users WHERE status=$1 ORDER BY id ASC;"
 	queryFindByEmailAndPassword = "SELECT id, first_name, last_name, email, created_at, hashed_password, status FROM users WHERE email=$1 AND status=$2;"
 )
 
