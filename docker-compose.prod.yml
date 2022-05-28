@@ -12,12 +12,12 @@ services:
     ports:
       - ${DB_PORT}:${DB_PORT}
     networks:
-      - full-app
+      - user-api
 
   api:
     image: 128292706517.dkr.ecr.eu-central-1.amazonaws.com/ecommerce_users:latest
     ports:
-      - "8080:8080"
+      - "8081:8081"
     environment:
       - DB_HOST=postgres
       - DB_PORT=${DB_PORT}
@@ -28,10 +28,10 @@ services:
     depends_on:
       - postgres
     networks:
-      - full-app
+      - user-api
     entrypoint: ["/app/wait-for.sh", "postgres:${DB_PORT}", "--", "/app/start.sh"]
     command: ["/app/main"]
 
 networks:
-  full-app:
+  user-api:
     driver: bridge

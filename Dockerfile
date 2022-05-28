@@ -15,6 +15,6 @@ COPY start.sh .
 COPY wait-for.sh .
 COPY datasources/postgresql/migration ./migration
 
-EXPOSE 8080
+EXPOSE 8081
 CMD [ "/app/main" ]
 ENTRYPOINT [ "/app/start.sh" ]
